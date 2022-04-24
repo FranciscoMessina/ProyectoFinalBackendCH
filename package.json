@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "concurrently \"tsc --watch\" \"nodemon -q build/index.js\"",
+    "serve": "concurrently \"tsc --watch\" \"nodemon -q build/src/index.js\"",
     "dev": "nodemon --exec \"ts-node src/index\"",
     "build": "rimraf build && tsc",
     "start": "node build/src/index"
@@ -12,6 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.23",
@@ -22,6 +23,8 @@
   },
   "dependencies": {
     "express": "^4.17.3",
+    "firebase-admin": "^10.1.0",
+    "mongoose": "^6.3.1",
     "rimraf": "^3.0.2"
   }
 }

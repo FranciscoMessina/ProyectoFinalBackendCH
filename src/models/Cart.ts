@@ -1,142 +1,149 @@
 import { promises as fs } from 'fs';
+import mongoose from 'mongoose';
 import path from 'path';
 import { ICart } from '../types/cart';
 import { IProduct } from '../types/product';
 
-export class Cart {
-  static filename = 'carts.json';
-  static path = path.join(__dirname, this.filename);
-
-  static async getFileData(): Promise<ICart[]> {
-    let file: string = '[]';
-    try {
-      // Leo si el archivo existe
-      file = await fs.readFile(this.path, 'utf-8');
-      // Si existe, lo devuelvo
-      return JSON.parse(file);
-    } catch (error: any) {
-      // Si hay algun error, verifico que sea porque el archivo no existe y creo uno con un array vacio
-      if (error.code == 'ENOENT') {
-        await fs.writeFile(this.path, '[]');
-        // Luego de crearlo, leo su valor para que la funcion devuelva un valor al ser llamada
-        file = await fs.readFile(this.path, 'utf-8');
-      } else {
-        // Si el error es por otra cosa, lo muestro por consola
-        console.log(error);
-      }
-    }
-
-    return JSON.parse(file);
+const cartSchema = new mongoose.Schema<ICart>(
+  {
+    products: [{type: mongoose.Schema.Types.ObjectId, ref: 'Product'}],
+  },
+  {
+    timestamps: true,
   }
+);
 
-  static async createCart(): Promise<number | void> {
-    try {
-      let data = await this.getFileData();
+export const Cart = mongoose.model<ICart>('Cart', cartSchema);
+// export class Cart {
+//   static filename = 'carts.json';
+//   static path = path.join(__dirname, this.filename);
 
-      // @ts-ignore
-      const id = data.length > 0 ? data?.at(-1)?.id + 1 : 1;
+//   static async getFileData(): Promise<ICart[]> {
+//     let file: string = '[]';
+//     try {
+//       // Leo si el archivo existe
+//       file = await fs.readFile(this.path, 'utf-8');
+//       // Si existe, lo devuelvo
+//       return JSON.parse(file);
+//     } catch (error: any) {
+//       // Si hay algun error, verifico que sea porque el archivo no existe y creo uno con un array vacio
+//       if (error.code == 'ENOENT') {
+//         await fs.writeFile(this.path, '[]');
+//         // Luego de crearlo, leo su valor para que la funcion devuelva un valor al ser llamada
+//         file = await fs.readFile(this.path, 'utf-8');
+//       } else {
+//         // Si el error es por otra cosa, lo muestro por consola
+//         console.log(error);
+//       }
+//     }
 
-      data.push({
-        id,
-        timestamp: Date.now(),
-        products: [],
-      });
+//     return JSON.parse(file);
+//   }
 
-      await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+//   static async createCart(): Promise<number | void> {
+//     try {
+//       let data = await this.getFileData();
 
-      return id;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//       // @ts-ignore
+//       const id = data.length > 0 ? data?.at(-1)?.id + 1 : 1;
 
-  static async addProductToCart(cartId: number, product: IProduct) {
-    try {
-      let data = await this.getFileData();
+//       data.push({
+//         id,
+//         timestamp: Date.now(),
+//         products: [],
+//       });
 
-      const newData = data.map((item, index) => {
-        if (item.id === cartId) {
-          item.products.push(product);
-          return item;
-        }
+//       await fs.writeFile(this.path, JSON.stringify(data, null, 2));
 
-        return item;
-      });
+//       return id;
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
 
-      const cart = newData.filter((item, index) => item.id === cartId);
+//   static async addProductToCart(cartId: number, product: IProduct) {
+//     try {
+//       let data = await this.getFileData();
 
-      await fs.writeFile(this.path, JSON.stringify(newData, null, 2));
+//       const newData = data.map((item, index) => {
+//         if (item.id === cartId) {
+//           item.products.push(product);
+//           return item;
+//         }
 
-      return cart;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//         return item;
+//       });
 
-  static async deleteProductFromCart(cartId: number, productId: number) {
-    try {
-      let data = await this.getFileData();
+//       const cart = newData.filter((item, index) => item.id === cartId);
 
-      const carts = data.map((item, index) => {
-        if (item.id === cartId) {
-          item.products = item.products.filter((product, index) => product.id !== productId);
-          return item;
-        }
+//       await fs.writeFile(this.path, JSON.stringify(newData, null, 2));
 
-        return item;
-      });
+//       return cart;
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
 
-      // const cartProducts = cart[0]?.products?.filter((item, index) => item.id !== productId);
+//   static async deleteProductFromCart(cartId: number, productId: number) {
+//     try {
+//       let data = await this.getFileData();
 
-      // cart[0].products = cartProducts;
+//       const carts = data.map((item, index) => {
+//         if (item.id === cartId) {
+//           item.products = item.products.filter((product, index) => product.id !== productId);
+//           return item;
+//         }
 
-      await fs.writeFile(this.path, JSON.stringify(carts, null, 2));
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//         return item;
+//       });
 
-  static async getById(id: number): Promise<ICart | undefined> {
-    try {
-      const data = await this.getFileData();
+//       await fs.writeFile(this.path, JSON.stringify(carts, null, 2));
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
 
-      const match = data.filter((item, index) => item.id === id);
+//   static async getById(id: number): Promise<ICart | undefined> {
+//     try {
+//       const data = await this.getFileData();
 
-      return match[0];
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//       const match = data.filter((item, index) => item.id === id);
 
-  static async getAll() {
-    try {
-      const data = await this.getFileData();
+//       return match[0];
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
 
-      return data;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//   static async getAll() {
+//     try {
+//       const data = await this.getFileData();
 
-  static async deleteById(id: number) {
-    try {
-      const data = await this.getFileData();
+//       return data;
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
 
-      const newData = data.filter((item, index) => item.id !== id);
+//   static async deleteById(id: number) {
+//     try {
+//       const data = await this.getFileData();
 
-      // console.log(newData);
+//       const newData = data.filter((item, index) => item.id !== id);
 
-      await fs.writeFile(this.path, JSON.stringify(newData, null, 2));
-    } catch (err) {
-      console.log(err);
-    }
-  }
+//       // console.log(newData);
 
-  static async deleteAll() {
-    try {
-      await fs.writeFile(this.path, '[]');
-    } catch (err) {
-      console.log(err);
-    }
-  }
-}
+//       await fs.writeFile(this.path, JSON.stringify(newData, null, 2));
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
+
+//   static async deleteAll() {
+//     try {
+//       await fs.writeFile(this.path, '[]');
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
+// }
