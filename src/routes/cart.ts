@@ -4,6 +4,7 @@ import {
   createCart,
   deleteCart,
   getCartProducts,
+  processCartOrder,
   removeProductFromCart,
 } from '../controllers/cart';
 
@@ -19,5 +20,7 @@ cartRoutes.get('/:id/products', getCartProducts);
 cartRoutes.post('/:id/products', addProductToCart);
 // Borrar productos del carrito
 cartRoutes.delete('/:id/products/:productId', removeProductFromCart);
+
+cartRoutes.post('/buy', processCartOrder);
 
 export { cartRoutes };

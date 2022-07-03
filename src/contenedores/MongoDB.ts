@@ -23,7 +23,7 @@ export class MongoDB<T> {
     }
   }
 
-  create(data: any) {
+  create(data: Partial<T>) {
     try {
       return this.model.create(data);
     } catch (err) {
@@ -31,7 +31,7 @@ export class MongoDB<T> {
     }
   }
 
-  update(id: string, data: any) {
+  update(id: string, data: Partial<T>) {
     try {
       return this.model.updateOne({ _id: id }, { $set: data });
     } catch (err) {

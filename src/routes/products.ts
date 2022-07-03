@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import passport from 'passport';
 import { addProduct, deleteProduct, getProducts, updateProduct } from '../controllers/product';
 import { roleCheck } from '../middlewares/roleCheck';
 
